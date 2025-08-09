@@ -11,7 +11,7 @@ export function AppContent() {
     const insets = useSafeAreaInsets();
 
     return (
-        <View className="flex-1 bg-gray-900">
+        <View className="flex-1 bg-zinc-950">
             {/* Contenu des screens */}
             <View className="flex-1">
                 {activeScreen === 'train' ? <TrainScreen /> : <PlanScreen />}
