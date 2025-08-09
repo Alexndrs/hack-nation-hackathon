@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, UploadFile, File
 from models import Workout, TimeSeriesPoint, DailyLog
 import services
+import shutil
+import os
 
 router = APIRouter()
 
@@ -31,3 +33,13 @@ def add_daily_log(log: DailyLog):
 def generate_fake():
     workout_id = services.generate_fake_workout()
     return {"status": "Fake workout generated", "workout_id": workout_id}
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@router.post("/upload-audio")
+async def upload_audio(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"status": "success", "file_path": file_path}

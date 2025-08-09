@@ -1,17 +1,67 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Button } from "react-native";
 import { PauseIcon, PlayIcon, Volume2Icon, VolumeOff } from "lucide-react-native"
-
+import { Audio } from 'expo-av';
 
 export default function TrainScreen() {
     const [trainingStarted, setTrainingStarted] = useState(false);
     const [mute, setMute] = useState(false);
     const [pause, setPause] = useState(false);
+    const [recording, setRecording] = useState<Audio.Recording | undefined>(undefined);
+    const [permissionResponse, requestPermission] = Audio.usePermissions();
 
-    const handleTrainingBtn = () => {
-        // Logic to start or stop the training
-        setTrainingStarted(!trainingStarted);
+    async function startRecording() {
+        try {
+        if (!permissionResponse || permissionResponse.status !== 'granted') {
+            console.log('Requesting permission..');
+            const permission = await requestPermission();
+            if (permission.status !== 'granted') {
+            console.warn('Permission denied');
+            return;
+            }
+        }
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: true,
+            playsInSilentModeIOS: true,
+        });
+
+        console.log('Starting recording..');
+        const { recording } = await Audio.Recording.createAsync(
+            Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+        setRecording(recording);
+        console.log('Recording started');
+        } catch (err) {
+        console.error('Failed to start recording', err);
+        }
     }
+
+    async function stopRecording() {
+        console.log('Stopping recording..');
+        if (recording) {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        console.log('Recording stopped and stored at', uri);
+        setRecording(undefined);
+        await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+        });
+        // Ici tu peux uploader ou traiter le fichier audio uri si besoin
+        } else {
+        console.warn('No recording in progress to stop.');
+        }
+    }
+
+    const handleTrainingBtn = async () => {
+        if (!trainingStarted) {
+        // Si la session ne tourne pas encore, on démarre l'enregistrement
+        await startRecording();
+        } else {
+        // Sinon on arrête l'enregistrement
+        await stopRecording();
+        }
+        setTrainingStarted(!trainingStarted);
+    };
 
     const handleMute = () => {
         // Logic to mute the training sounds
