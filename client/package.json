@@ -12,6 +12,7 @@
     "@react-navigation/bottom-tabs": "^7.4.5",
     "@react-navigation/native": "^7.1.17",
     "expo": "~53.0.20",
+    "expo-av": "~15.1.7",
     "expo-status-bar": "~2.2.3",
     "lucide-react-native": "^0.539.0",
     "nativewind": "^4.1.23",
