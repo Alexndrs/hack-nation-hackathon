@@ -1,7 +1,13 @@
 from elevenlabs.client import ElevenLabs
 from elevenlabs import play
 
-api_key = "sk_78c5a73709e2a2651372fcc73cc105e46b61179a5f894d65" #clé de Julien
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+api_key = os.getenv("TTS_KEY") # api_key = "sk_78c5a73709e2a2651372fcc73cc105e46b61179a5f894d65" #clé de Julien
+
 
 Text = "Bienvenue à votre séance sportive ! Aujourd'hui, nous allons travailler sur votre endurance et votre force. Commençons par un échauffement léger pour préparer vos muscles."
 
