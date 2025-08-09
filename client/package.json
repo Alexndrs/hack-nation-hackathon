@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@elevenlabs/client": "^0.5.0",
+    "@elevenlabs/react-native": "^0.2.1",
     "@react-navigation/bottom-tabs": "^7.4.5",
     "@react-navigation/native": "^7.1.17",
     "expo": "~53.0.20",
