@@ -82,22 +82,15 @@ export default function CallAgentScreen() {
         onUnhandledClientToolCall: (params) => console.log('Unhandled client tool call:', params),
     });
     
-}
-
-
-
-  const conversation = useConversation();
-
-
-
-  return (
-    <View className="flex-1 items-center justify-center">
-      <Text className="text-white">Call Agent Screen</Text>
-      {!isConnected ? (
-        <Button title="Start Call" onPress={startConversation} />
-      ) : (
-        <Button title="End Call" onPress={endConversation} />
-      )}
-    </View>
-  );
+    
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-white">Call Agent Screen</Text>
+        {!isConnected ? (
+          <Button title="Start Call" onPress={startConversation} />
+        ) : (
+          <Button title="End Call" onPress={endConversation} />
+        )}
+      </View>
+    );
 }
