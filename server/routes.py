@@ -17,6 +17,7 @@ def get_workouts():
 
 @router.post("/workouts")
 def add_workout(workout: Workout):
+    print(workout)
     workout_id = services.insert_workout(workout)
     return {"status": "Workout added", "workout_id": workout_id}
 

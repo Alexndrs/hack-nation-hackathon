@@ -10,8 +10,8 @@ def insert_workout(workout: Workout) -> int:
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO workout (avg_heart_rate, avg_speed, max_speed, duration_seconds)
-        VALUES (?, ?, ?, ?)
-    """, (workout.avg_heart_rate, workout.avg_speed, workout.max_speed, workout.duration_seconds))
+        VALUES (?, ?, ?, ?, ?)
+    """, (workout.avg_heart_rate, workout.avg_speed, workout.max_speed, workout.duration_seconds, workout.start_time))
     workout_id = cursor.lastrowid
     conn.commit()
     conn.close()

@@ -18,7 +18,8 @@ def init_db():
             avg_heart_rate REAL,
             avg_speed REAL,
             max_speed REAL,
-            duration_seconds INTEGER
+            duration_seconds INTEGER,
+            start_time TEXT
         )
     """)
 
@@ -43,7 +44,7 @@ def init_db():
             date TEXT,
             sleep_seconds INTEGER,
             calories REAL,
-            weight_kg REAL,
+            weight_kg REAL
         )
     """)
 
