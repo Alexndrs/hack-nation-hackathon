@@ -9,7 +9,7 @@ type InputFieldProps = {
 
 const InputField: React.FC<InputFieldProps> = ({ label, value, onChange, placeholder }) => (
     <View className="flex flex-col items-center">
-        <Text className="text-gray-200 text-base font-bold ml-2 min-w-16">
+        <Text className="text-gray-400 text-xs mb-1 font-bold ml-2 min-w-16">
             {label}
         </Text>
         <TextInput

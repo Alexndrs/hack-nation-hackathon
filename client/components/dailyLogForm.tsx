@@ -66,7 +66,7 @@ export default function DailyLogForm({ date, existingLog, onSave }: {
             <View className="bg-white/10 border border-white/10 rounded-xl p-2">
                 <View className="flex flex-row items-end">
                     <InputField
-                        label="Sleep"
+                        label="Sleep (h)"
                         value={displayValues.sleep_seconds}
                         onChange={(value) => handleChange('sleep_seconds', value)}
                         placeholder="8.5h"
@@ -80,7 +80,7 @@ export default function DailyLogForm({ date, existingLog, onSave }: {
                     />
 
                     <InputField
-                        label="Weight"
+                        label="Weight (kg)"
                         value={displayValues.weight_kg}
                         onChange={(value) => handleChange('weight_kg', value)}
                         placeholder="70.5kg"
@@ -88,7 +88,7 @@ export default function DailyLogForm({ date, existingLog, onSave }: {
                     <TouchableOpacity
                         onPress={handleSubmit}
                         disabled={isSubmitting}
-                        className={`ml-4 p-3 rounded-lg ${isSubmitting
+                        className={`ml-4 p-3 flex-1 items-center rounded-lg border border-white/20 ${isSubmitting
                             ? 'bg-gray-600'
                             : isUpdate
                                 ? 'bg-blue-500'

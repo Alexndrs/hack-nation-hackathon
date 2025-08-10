@@ -81,6 +81,21 @@ export async function postTimeSeriesPoints(points: TimeSeriesPoint[]): Promise<v
     }
 }
 
+export async function getWorkoutTimeSeries(workoutId: number): Promise<TimeSeriesPoint[]> {
+    const response = await fetch(`${SERVER_URL}/workouts-timeseries/${workoutId}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch workout time series");
+    }
+
+    return response.json();
+}
+
 export async function postDailyLog(dailyLog: DailyLog): Promise<void> {
     const response = await fetch(`${SERVER_URL}/daily-log`, {
         method: "POST",
