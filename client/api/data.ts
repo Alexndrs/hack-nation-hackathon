@@ -97,6 +97,21 @@ export async function postDailyLog(dailyLog: DailyLog): Promise<void> {
     }
 }
 
+export async function patchDailyLog(dailyLog: DailyLog): Promise<void> {
+    console.log("Patching daily log:", dailyLog, "to", `${SERVER_URL}/daily-log`);
+    const response = await fetch(`${SERVER_URL}/daily-log`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dailyLog),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to patch daily log");
+    }
+}
+
 export async function getDailyLogs(): Promise<DailyLog[]> {
     const response = await fetch(`${SERVER_URL}/daily-logs`, {
         method: "GET",

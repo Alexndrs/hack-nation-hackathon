@@ -1,74 +1,118 @@
-import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, Alert, ScrollView } from "react-native";
-import { postDailyLog } from "../api/data";
+import { useState, useEffect } from "react";
+import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { type DailyLog } from "../api/types";
+import InputField from "./inputField";
+import { PlusIcon, PencilIcon } from 'lucide-react-native'
 
-export default function DailyLogForm({ date }: { date: Date }) {
-    const [dailyLog, setDailyLog] = useState<DailyLog>({
-        date: date.toISOString().split("T")[0],
-        sleep_seconds: 0,
-        calories: 0,
-        weight_kg: 0,
+export default function DailyLogForm({ date, existingLog, onSave }: {
+    date: Date;
+    existingLog?: DailyLog;
+    onSave: (log: DailyLog, isUpdate: boolean) => Promise<void>;
+}) {
+
+    const dateString = date.toISOString().split('T')[0];
+    const id = date.getTime();
+    const isUpdate = !!existingLog;
+
+    const [displayValues, setDisplayValues] = useState({
+        sleep_seconds: existingLog?.sleep_seconds?.toString() || '', // Pas de conversion, garde la valeur telle quelle
+        calories: existingLog?.calories?.toString() || '',
+        weight_kg: existingLog?.weight_kg?.toString() || '',
     });
 
-    const handleChange = (field: keyof DailyLog, value: string) => {
-        setDailyLog((prev) => ({
-            ...prev,
-            [field]: field === "date" ? value : Number(value),
-        }));
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        setDisplayValues({
+            sleep_seconds: existingLog?.sleep_seconds?.toString() || '', // Pas de conversion ici non plus
+            calories: existingLog?.calories?.toString() || '',
+            weight_kg: existingLog?.weight_kg?.toString() || '',
+        });
+    }, [dateString, existingLog]);
+
+    const handleChange = (field: keyof typeof displayValues, value: string) => {
+        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+            setDisplayValues(prev => ({
+                ...prev,
+                [field]: value
+            }));
+        }
     };
 
-    const handleSave = async () => {
+    const getNumericValues = (): DailyLog => {
+        return {
+            id,
+            date: dateString,
+            sleep_seconds: displayValues.sleep_seconds === '' ? 0 : Number(displayValues.sleep_seconds),
+            calories: displayValues.calories === '' ? 0 : Number(displayValues.calories),
+            weight_kg: displayValues.weight_kg === '' ? 0 : Number(displayValues.weight_kg),
+        };
+    };
+
+    const handleSubmit = async () => {
+        setIsSubmitting(true);
         try {
-            await postDailyLog(dailyLog);
-            Alert.alert("Succès", "Daily log saved successfully");
+            const formData = getNumericValues();
+            await onSave(formData, isUpdate);
         } catch (error) {
-            console.error("Failed to save daily log:", error);
-            Alert.alert("Erreur", "Impossible de sauvegarder le daily log");
+            console.error('Save failed:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <ScrollView className="p-6 w-full">
-            <Text className="text-white text-2xl font-bold mb-6 text-center">Daily Log</Text>
+        <View className="w-full mt-5 max-w-sm mx-auto">
+            <View className="bg-white/10 border border-white/10 rounded-xl p-2">
+                <View className="flex flex-row items-end">
+                    <InputField
+                        label="Sleep"
+                        value={displayValues.sleep_seconds}
+                        onChange={(value) => handleChange('sleep_seconds', value)}
+                        placeholder="8.5h"
+                    />
 
-            {/* Sleep */}
-            <Text className="text-gray-300 mb-1">Sleep (seconds)</Text>
-            <TextInput
-                value={dailyLog.sleep_seconds.toString()}
-                onChangeText={(text) => handleChange("sleep_seconds", text)}
-                keyboardType="numeric"
-                placeholder="e.g. 28800"
-                placeholderTextColor="#888"
-                className="bg-gray-800 text-white px-4 py-2 rounded mb-4"
-            />
+                    <InputField
+                        label="Kcal"
+                        value={displayValues.calories}
+                        onChange={(value) => handleChange('calories', value)}
+                        placeholder="2000"
+                    />
 
-            {/* Calories */}
-            <Text className="text-gray-300 mb-1">Calories</Text>
-            <TextInput
-                value={dailyLog.calories.toString()}
-                onChangeText={(text) => handleChange("calories", text)}
-                keyboardType="numeric"
-                placeholder="e.g. 2000"
-                placeholderTextColor="#888"
-                className="bg-gray-800 text-white px-4 py-2 rounded mb-4"
-            />
+                    <InputField
+                        label="Weight"
+                        value={displayValues.weight_kg}
+                        onChange={(value) => handleChange('weight_kg', value)}
+                        placeholder="70.5kg"
+                    />
+                    <TouchableOpacity
+                        onPress={handleSubmit}
+                        disabled={isSubmitting}
+                        className={`ml-4 p-3 rounded-lg ${isSubmitting
+                            ? 'bg-gray-600'
+                            : isUpdate
+                                ? 'bg-blue-500'
+                                : 'bg-green-500'
+                            }`}
+                    >
+                        {isSubmitting ? (
+                            <View className="flex-row items-center justify-center">
+                                <ActivityIndicator size="small" color="white" />
+                            </View>
+                        ) : (
+                            <View className="text-white font-medium text-center">
+                                {isUpdate ? (
+                                    <PencilIcon size={20} color="white" />
 
-            {/* Weight */}
-            <Text className="text-gray-300 mb-1">Weight (kg)</Text>
-            <TextInput
-                value={dailyLog.weight_kg.toString()}
-                onChangeText={(text) => handleChange("weight_kg", text)}
-                keyboardType="numeric"
-                placeholder="e.g. 70"
-                placeholderTextColor="#888"
-                className="bg-gray-800 text-white px-4 py-2 rounded mb-6"
-            />
+                                ) : (
+                                    <PlusIcon size={20} color="white" />
+                                )}
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
 
-            {/* Save Button */}
-            <TouchableOpacity onPress={handleSave} className="bg-blue-500 py-3 rounded">
-                <Text className="text-white text-center font-semibold">Save Daily Log</Text>
-            </TouchableOpacity>
-        </ScrollView>
+            </View>
+        </View>
     );
-}
+};

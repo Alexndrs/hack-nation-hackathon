@@ -41,6 +41,12 @@ def add_daily_log(log: DailyLog):
     services.insert_daily_log(log)
     return {"status": "Daily log added"}
 
+@router.patch("/daily-log")
+def update_daily_log(log: DailyLog):
+    print(log)
+    services.update_daily_log(log)
+    return {"status": "Daily log updated"}
+
 @router.post("/generate-fake-workout")
 def generate_fake():
     workout_id = services.generate_fake_workout()

@@ -17,6 +17,7 @@ export type TimeSeriesPoint = {
 }
 
 export type DailyLog = {
+    id: number;
     date: string;
     sleep_seconds: number;
     calories: number;

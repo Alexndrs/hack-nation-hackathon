@@ -44,9 +44,20 @@ def insert_daily_log(log: DailyLog):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO daily_log (date, sleep_seconds, calories, weight_kg)
-        VALUES (?, ?, ?, ?)
-    """, (log.date, log.sleep_seconds, log.calories, log.weight_kg))
+        INSERT INTO daily_log (id, date, sleep_seconds, calories, weight_kg)
+        VALUES (?, ?, ?, ?, ?)
+    """, (log.id, log.date, log.sleep_seconds, log.calories, log.weight_kg))
+    conn.commit()
+    conn.close()
+
+def update_daily_log(log: DailyLog):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE daily_log
+        SET sleep_seconds = ?, calories = ?, weight_kg = ?
+        WHERE id = ?
+    """, (log.sleep_seconds, log.calories, log.weight_kg, log.id))
     conn.commit()
     conn.close()
 

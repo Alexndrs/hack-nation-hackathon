@@ -7,6 +7,15 @@ export default function DateNav({ handlePreviousDay, handleNextDay, date }: {
     handleNextDay: () => void;
     date: Date;
 }) {
+    const formatDate = (date: Date) => {
+        return date.toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
     return (
         <View className="flex flex-row items-center mt-20">
             <TouchableOpacity className="-rotate-90 p-5" onPress={handlePreviousDay}>
@@ -14,11 +23,7 @@ export default function DateNav({ handlePreviousDay, handleNextDay, date }: {
             </TouchableOpacity>
 
             <Text className="text-gray-300 text-lg px-8 py-4 rounded-full bg-white/10 border border-white/10">
-                {date.toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                })}
+                {formatDate(date)}
             </Text>
 
             <TouchableOpacity className="rotate-90 p-5" onPress={handleNextDay}>
