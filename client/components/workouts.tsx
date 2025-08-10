@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import LineChart from "./LineChart";
+// import LineChart from "./LineChart";
 import { type Workout } from "../api/types";
 import { useDataContext } from "../context/dataProvider";
 import { EllipsisIcon } from "lucide-react-native"
@@ -9,7 +9,7 @@ export default function Workouts({ workouts }: {
     workouts: Workout[];
 }) {
 
-    const { setWorkoutTimeSeries } = useDataContext();
+    const { setWorkoutTimeSeries, setShowTimeSeries } = useDataContext();
 
     const duration_h_min = (duration_seconds: number) => {
         const hours = Math.floor(duration_seconds / 3600);
@@ -23,7 +23,7 @@ export default function Workouts({ workouts }: {
 
 
     return (
-        <View className="mx-auto w-[85%]">
+        <View className="mx-auto w-[85%] mt-5">
             <Text className="text-gray-300">Workout</Text>
 
             {workouts.map((workout) => {
@@ -41,14 +41,17 @@ export default function Workouts({ workouts }: {
                         <Text className="text-gray-400">{duration_h_min(workout.duration_seconds)}</Text>
                         <TouchableOpacity
                             className="ml-auto bg-white/10 border border-white/10 rounded"
-                            onPress={() => setWorkoutTimeSeries(workout.id)}>
+                            onPress={() => {
+                                setWorkoutTimeSeries(workout.id);
+                                setShowTimeSeries(true);
+                            }}>
                             <EllipsisIcon size={20} color="rgba(255,255,255,0.40)" />
                         </TouchableOpacity>
                     </View>
                 );
             })}
 
-            <LineChart />
+            {/* <LineChart /> */}
         </View>
 
     );
