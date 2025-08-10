@@ -29,14 +29,20 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "android.permissions.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_BACKGROUND_LOCATION"
-      ]
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+      ],
+      "package": "com.anonymous.client"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c943fc02-f772-4e4b-94fc-88e1244afad4"
+      }
     }
   }
 }
