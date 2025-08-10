@@ -2,6 +2,9 @@ import { Audio } from 'expo-av';
 import * as Location from 'expo-location';
 import { postWorkout, postTimeSeriesPoints, patchWorkout } from '../api/data';
 import { TimeSeriesPoint, Workout } from '../api/types';
+import { useConversation } from '@elevenlabs/react-native';
+import { useState } from 'react';
+
 
 // Interface pour l'état du training que les composants vont observer
 export interface TrainingState {
@@ -12,6 +15,7 @@ export interface TrainingState {
     currentHeartRate: number | null;
     currentDuration: string;
     error: string | null;
+    isConnected?: boolean;
 }
 
 // Type pour les listeners qui observent les changements
@@ -25,7 +29,9 @@ class TrainingService {
     private currentWorkout: Workout | null = null;
     private isPaused: boolean = false;
     private error: string | null = null;
+    //private isConnected: boolean = false;
 
+    
     // Liste des listeners qui observent les changements d'état
     private listeners: TrainingStateListener[] = [];
 
@@ -128,6 +134,7 @@ class TrainingService {
             this.currentWorkout.id = workout_id;
 
             await this.startAudioRecording();
+            //await this.startConversation();
             await this.startLocationTracking();
             this.startTimer();
 
