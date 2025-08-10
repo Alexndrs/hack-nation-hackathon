@@ -11,7 +11,7 @@ export default function NavBar({ activeScreen, setActiveScreen }: NavBarProps) {
     return (
 
         <View
-            className="bg-white/10 border border-white/10 rounded-full p-1 shadow-xl"
+            className="bg-white/10 border border-white/10 rounded-full p-1 shadow-xl z-15"
         >
             <View className="flex-row">
                 {/* Bouton Train */}
