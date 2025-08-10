@@ -1,237 +1,269 @@
-import { useState, useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity,StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { PauseIcon, PlayIcon, Volume2Icon, VolumeOff } from "lucide-react-native"
 //import BackgroundTimer from 'react-native-background-timer';
-import { Audio } from 'expo-av';
-import * as Location from "expo-location";
+import { useTraining } from '../hooks/useTraining';
 
 
 export default function TrainScreen() {
-    const [trainingStarted, setTrainingStarted] = useState(false);
     const [mute, setMute] = useState(false);
-    const [pause, setPause] = useState(false);
-    const [recording, setRecording] = useState<Audio.Recording | undefined>(undefined);
-    const [permissionResponse, requestPermission] = Audio.usePermissions();
+
+    const {
+        // For user feedback
+        isActive,
+        isPaused,
+        currentWorkout,
+        currentSpeed,
+        currentHeartRate,
+        currentDuration,
+        error,
+        isLoading,
+
+        // Logic
+        startTraining,
+        stopTraining,
+        pauseTraining,
+        resumeTraining,
+    } = useTraining();
 
 
-    const [speed, setSpeed] = useState<number | null>(0);
-    const [heartRate, setHeartRate] = useState<number | null>(150);
-    const [seconds, setSeconds] = useState<number>(0)
-    const locationWatcher = useRef<Location.LocationSubscription | null>(null);
-    let heartRateInterval: NodeJS.Timeout;
-    // useEffect(() => {
-    //     if (trainingStarted && !pause) {
-    //         BackgroundTimer.runBackgroundTimer(() => {
-    //             setSeconds(prev => prev + 0.1);
-    //         }, 100)
-    //     } else {
-    //         BackgroundTimer.stopBackgroundTimer()
-    //     }
-    //     return () => {
-    //         BackgroundTimer.stopBackgroundTimer(); // Cleanup on unmount or running change
-    //     };
-    // }, [trainingStarted, pause]);
-
-
-    async function ensurePermissions() {
-        // Permission audio
-        if (!permissionResponse || permissionResponse.status !== "granted") {
-            const audioPerm = await requestPermission();
-            if (audioPerm.status !== "granted") {
-                console.warn("Permission audio refusée");
-                return false;
+    const handleTrainingButton = async () => {
+        if (!isActive) {
+            // Démarrer l'entraînement
+            const success = await startTraining();
+            if (!success && error) {
+                Alert.alert(
+                    'Erreur',
+                    error || 'Impossible de démarrer l\'entraînement'
+                );
             }
-        }
-
-        let fgStatus = await Location.getForegroundPermissionsAsync();
-        if (fgStatus.status !== "granted") {
-            const fgPerm = await Location.requestForegroundPermissionsAsync();
-            if (fgPerm.status !== "granted") {
-                console.warn("Permission GPS foreground refusée");
-                return false;
-            }
-        }
-
-
-        let bgStatus = await Location.getBackgroundPermissionsAsync();
-        if (bgStatus.status !== "granted") {
-            const bgPerm = await Location.requestBackgroundPermissionsAsync();
-            if (bgPerm.status !== "granted") {
-                console.warn("Permission GPS arrière-plan refusée");
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-
-    async function startRecording() {
-        try {
-            const ok = await ensurePermissions();
-            if (!ok) return;
-
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: true,
-                playsInSilentModeIOS: true,
-            });
-
-            console.log('Starting recording..');
-            const { recording } = await Audio.Recording.createAsync(
-                Audio.RecordingOptionsPresets.HIGH_QUALITY
-            );
-            setRecording(recording);
-            console.log('Recording started');
-
-            locationWatcher.current = await Location.watchPositionAsync(
-                {
-                    accuracy: Location.Accuracy.High,
-                    timeInterval: 2000, // save every 2 seconds
-                    distanceInterval: 0
-                },
-                (location) => {
-                    console.log("Location received :", location.coords);
-                    setSpeed(location.coords.speed);
-                    console.log("Speed received :", location.coords.speed);
-                    // Save in state and send
-                }
-            );
-        } catch (err) {
-            console.error('Failed to start recording', err);
-        }
-    }
-
-    async function stopRecording() {
-        console.log('Stopping recording..');
-        if (recording) {
-            await recording.stopAndUnloadAsync();
-            const uri = recording.getURI();
-            console.log('Recording stopped and stored at', uri);
-            setRecording(undefined);
-            await Audio.setAudioModeAsync({
-                allowsRecordingIOS: false,
-            });
-            // Ici tu peux uploader ou traiter le fichier audio uri si besoin
         } else {
-            console.warn('No recording in progress to stop.');
+            // Arrêter l'entraînement
+            Alert.alert(
+                'Arrêter l\'entraînement',
+                'Êtes-vous sûr de vouloir arrêter cette session ?',
+                [
+                    { text: 'Annuler', style: 'cancel' },
+                    { text: 'Arrêter', style: 'destructive', onPress: stopTraining },
+                ]
+            );
         }
+    };
 
-        if (locationWatcher.current) {
-            locationWatcher.current.remove();
-            locationWatcher.current = null;
-            console.log("Tracking GPS arrêté");
-        }
-    }
-
-    const handleTrainingBtn = async () => {
-        if (!trainingStarted) {
-            // Si la session ne tourne pas encore, on démarre l'enregistrement
-            await startRecording();
+    const handlePauseResume = () => {
+        if (isPaused) {
+            resumeTraining();
         } else {
-            // Sinon on arrête l'enregistrement
-            await stopRecording();
+            pauseTraining();
         }
-        setTrainingStarted(!trainingStarted);
     };
 
     const handleMute = () => {
-        // Logic to mute the training sounds
         setMute(!mute);
-    }
+    };
 
-    const handlePause = () => {
-        // Logic to pause the training
-        setPause(!pause);
-    }
+
 
     return (
-        <View className="flex-1 items-center justify-center">
-            {trainingStarted && (
-            <View className="items-center mb-6">
-                {/* Speed Display */}
-                <Text style={styles.speedText}>
-                    🏃‍♂️ {speed ? speed.toFixed(1) : 0} km/h
-                </Text>
-
-                {/* Heart Rate Display */}
-                {heartRate !== null && (
-                <Text style={styles.heartRateText}>
-                    ❤️ {heartRate} bpm
-                </Text>
-                )}
-
-                {/* Stopwatch Display */}
-                {trainingStarted && (
-                <Text style={styles.heartRateText}>
-                    {seconds}
-                </Text>
-                )}
-
-                {/* Pause / Mute Controls */}
-                <View className="flex flex-row gap-4 mt-4">
-                <TouchableOpacity
-                    className="p-3 border border-white/10 bg-white/10 rounded-md"
-                    onPress={handlePause}
-                >
-                    {pause ? (
-                    <PlayIcon size={24} color="white" />
-                    ) : (
-                    <PauseIcon size={24} color="white" />
-                    )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    className="p-3 border border-white/10 bg-white/10 rounded-md"
-                    onPress={handleMute}
-                >
-                    {mute ? (
-                    <VolumeOff size={24} color="white" />
-                    ) : (
-                    <Volume2Icon size={24} color="white" />
-                    )}
-                </TouchableOpacity>
+        <View style={styles.container}>
+            {/* Afficher les erreurs si nécessaire */}
+            {error && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>⚠️ {error}</Text>
                 </View>
-            </View>
             )}
 
-            {/* Start / Stop Training Button */}
+            {/* Stats pendant l'entraînement */}
+            {isActive && (
+                <View style={styles.statsContainer}>
+                    {/* Speed Display */}
+                    <Text style={styles.speedText}>
+                        🏃‍♂️ {currentSpeed ? currentSpeed.toFixed(1) : '0.0'} km/h
+                    </Text>
+
+                    {/* Heart Rate Display */}
+                    {currentHeartRate !== null && (
+                        <Text style={styles.heartRateText}>
+                            ❤️ {currentHeartRate} bpm
+                        </Text>
+                    )}
+
+                    {/* Duration Display */}
+                    <Text style={styles.durationText}>
+                        ⏱️ {currentDuration}
+                    </Text>
+
+                    {/* Workout Stats */}
+                    {currentWorkout && (
+                        <View style={styles.workoutStats}>
+                            <Text style={styles.statText}>
+                                Vitesse moy: {currentWorkout.avg_speed.toFixed(1)} km/h
+                            </Text>
+                            <Text style={styles.statText}>
+                                Vitesse max: {currentWorkout.max_speed.toFixed(1)} km/h
+                            </Text>
+                            {currentWorkout.avg_heart_rate > 0 && (
+                                <Text style={styles.statText}>
+                                    FC moy: {currentWorkout.avg_heart_rate} bpm
+                                </Text>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Pause Status */}
+                    {isPaused && (
+                        <Text style={styles.pausedText}>
+                            ⏸️ EN PAUSE
+                        </Text>
+                    )}
+
+                    {/* Controls */}
+                    <View style={styles.controlsContainer}>
+                        <TouchableOpacity
+                            style={styles.controlButton}
+                            onPress={handlePauseResume}
+                            disabled={isLoading}
+                        >
+                            {isPaused ? (
+                                <PlayIcon size={24} color="white" />
+                            ) : (
+                                <PauseIcon size={24} color="white" />
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.controlButton}
+                            onPress={handleMute}
+                        >
+                            {mute ? (
+                                <VolumeOff size={24} color="white" />
+                            ) : (
+                                <Volume2Icon size={24} color="white" />
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+
+            {/* Start / Stop Button */}
             <TouchableOpacity
-            className={`px-8 py-4 rounded-full border border-white/10 ${
-                !trainingStarted ? "bg-white/10" : "bg-red-800/30"
-            }`}
-            onPress={handleTrainingBtn}
-            style={{ minWidth: 120 }}
+                style={[
+                    styles.trainingButton,
+                    isActive ? styles.stopButton : styles.startButton,
+                ]}
+                onPress={handleTrainingButton}
+                disabled={isLoading}
             >
-            <Text
-                className={`text-center font-semibold text-base ${
-                trainingStarted ? "text-red-300" : "text-gray-300"
-                }`}
-            >
-                {trainingStarted ? "Stop training" : "Start Training"}
-            </Text>
+                <Text
+                    style={[
+                        styles.trainingButtonText,
+                        isActive ? styles.stopButtonText : styles.startButtonText,
+                    ]}
+                >
+                    {isLoading
+                        ? 'Chargement...'
+                        : isActive
+                            ? 'Arrêter l\'entraînement'
+                            : 'Commencer l\'entraînement'}
+                </Text>
             </TouchableOpacity>
         </View>
-        );
-
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  speedText: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 10,
-  },
-  heartRateText: {
-    fontSize: 28,
-    color: "red",
-    fontWeight: "600",
-    marginBottom: 20,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#000',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    errorContainer: {
+        backgroundColor: 'rgba(244, 67, 54, 0.2)',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: '#F44336',
+    },
+    errorText: {
+        color: '#F44336',
+        textAlign: 'center',
+        fontWeight: '600',
+    },
+    statsContainer: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    speedText: {
+        fontSize: 36,
+        fontWeight: 'bold',
+        color: 'white',
+        marginBottom: 10,
+    },
+    heartRateText: {
+        fontSize: 28,
+        color: 'red',
+        fontWeight: '600',
+        marginBottom: 10,
+    },
+    durationText: {
+        fontSize: 24,
+        color: '#4CAF50',
+        fontWeight: '600',
+        marginBottom: 10,
+    },
+    workoutStats: {
+        alignItems: 'center',
+        marginVertical: 15,
+    },
+    statText: {
+        fontSize: 14,
+        color: '#B0B0B0',
+        marginVertical: 2,
+    },
+    pausedText: {
+        fontSize: 18,
+        color: '#FFA726',
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    controlsContainer: {
+        flexDirection: 'row',
+        gap: 16,
+        marginTop: 20,
+    },
+    controlButton: {
+        padding: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 8,
+    },
+    trainingButton: {
+        paddingHorizontal: 32,
+        paddingVertical: 16,
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        minWidth: 200,
+    },
+    startButton: {
+        backgroundColor: 'rgba(76, 175, 80, 0.2)',
+    },
+    stopButton: {
+        backgroundColor: 'rgba(244, 67, 54, 0.3)',
+    },
+    trainingButtonText: {
+        textAlign: 'center',
+        fontWeight: '600',
+        fontSize: 16,
+    },
+    startButtonText: {
+        color: '#4CAF50',
+    },
+    stopButtonText: {
+        color: '#F44336',
+    },
 });

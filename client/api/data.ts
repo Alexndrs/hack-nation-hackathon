@@ -31,7 +31,11 @@ export async function getWorkouts(): Promise<Workout[]> {
     return response.json();
 }
 
-export async function postWorkout(workout: Workout): Promise<{ status: string, workout_id: string }> {
+export async function postWorkout(workout: Workout): Promise<{ status: string, workout_id: number }> {
+
+    console.log("Posting workout:", workout, "to", `${SERVER_URL}/workouts`);
+
+
     const response = await fetch(`${SERVER_URL}/workouts`, {
         method: "POST",
         headers: {
@@ -40,6 +44,8 @@ export async function postWorkout(workout: Workout): Promise<{ status: string, w
         body: JSON.stringify(workout),
     });
 
+    console.log("Response from postWorkout: ", response);
+
     if (!response.ok) {
         throw new Error("Failed to post workout");
     }
@@ -47,6 +53,19 @@ export async function postWorkout(workout: Workout): Promise<{ status: string, w
     return response.json();
 }
 
+export async function patchWorkout(workout: Workout): Promise<void> {
+    const response = await fetch(`${SERVER_URL}/workouts`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(workout),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to patch workout");
+    }
+}
 
 export async function postTimeSeriesPoints(points: TimeSeriesPoint[]): Promise<void> {
     const response = await fetch(`${SERVER_URL}/time-series`, {
