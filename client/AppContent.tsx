@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TrainScreen from './screen/trainScreen';
 import PlanScreen from './screen/planScreen';
 import NavBar from './components/navBar';
+import CallAgentScreen from './screen/callAgent';
 
 export function AppContent() {
     const [activeScreen, setActiveScreen] = useState('train');
@@ -23,6 +24,7 @@ export function AppContent() {
                 style={{ bottom: Math.max(insets.bottom + 16, 32) }}
             >
                 <NavBar activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
+                <CallAgentScreen />
             </View>
 
         </View>
