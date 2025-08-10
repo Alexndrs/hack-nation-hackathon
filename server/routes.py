@@ -21,6 +21,12 @@ def add_workout(workout: Workout):
     workout_id = services.insert_workout(workout)
     return {"status": "Workout added", "workout_id": workout_id}
 
+@router.patch("/workouts")
+def update_workout(workout: Workout):
+    print(workout)
+    services.update_workout(workout)
+    return {"status": "Workout updated"}
+
 @router.get("/daily-logs")
 def get_daily_logs():
     return services.get_daily_logs()

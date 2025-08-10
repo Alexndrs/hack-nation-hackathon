@@ -9,13 +9,24 @@ def insert_workout(workout: Workout) -> int:
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO workout (avg_heart_rate, avg_speed, max_speed, duration_seconds)
+        INSERT INTO workout (avg_heart_rate, avg_speed, max_speed, duration_seconds, start_time)
         VALUES (?, ?, ?, ?, ?)
     """, (workout.avg_heart_rate, workout.avg_speed, workout.max_speed, workout.duration_seconds, workout.start_time))
     workout_id = cursor.lastrowid
     conn.commit()
     conn.close()
     return workout_id
+
+def update_workout(workout: Workout):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE workout
+        SET avg_heart_rate = ?, avg_speed = ?, max_speed = ?, duration_seconds = ?, start_time = ?
+        WHERE id = ?
+    """, (workout.avg_heart_rate, workout.avg_speed, workout.max_speed, workout.duration_seconds, workout.start_time, workout.id))
+    conn.commit()
+    conn.close()
 
 def insert_time_series(point: List[TimeSeriesPoint]):
     conn = get_connection()

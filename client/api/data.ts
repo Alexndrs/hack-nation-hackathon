@@ -33,7 +33,7 @@ export async function getWorkouts(): Promise<Workout[]> {
 
 export async function postWorkout(workout: Workout): Promise<{ status: string, workout_id: number }> {
 
-    console.log("Posting workout: ", workout, "to", `${SERVER_URL}/workouts`);
+    console.log("Posting workout:", workout, "to", `${SERVER_URL}/workouts`);
 
 
     const response = await fetch(`${SERVER_URL}/workouts`, {
@@ -54,7 +54,7 @@ export async function postWorkout(workout: Workout): Promise<{ status: string, w
 }
 
 export async function patchWorkout(workout: Workout): Promise<void> {
-    const response = await fetch(`${SERVER_URL}/workouts/${workout.id}`, {
+    const response = await fetch(`${SERVER_URL}/workouts`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",

@@ -215,7 +215,7 @@ class TrainingService {
         this.locationSubscription = await Location.watchPositionAsync(
             {
                 accuracy: Location.Accuracy.High,
-                timeInterval: 2000,
+                timeInterval: this.frequency,
                 distanceInterval: 0,
             },
             (location) => {
@@ -230,13 +230,12 @@ class TrainingService {
                     };
 
                     this.timeSerie.push(trainingData);
-                    this.updateWorkout();
 
                     // Notifier les changements de données en temps réel
                     this.notifyListeners();
                 }
 
-                if (this.timeSerie.length > 10) { // save every 10 points
+                if (this.timeSerie.length > 5) { // save every 5 points
                     postTimeSeriesPoints(this.timeSerie).then(() => {
                         this.timeSerie = [];
                     }).catch((error) => {
@@ -280,6 +279,7 @@ class TrainingService {
                 const currentTime = Date.now();
                 const duration = Math.floor((currentTime - new Date(this.currentWorkout.start_time).getTime()) / 1000);
                 this.currentWorkout.duration_seconds = duration;
+                this.updateWorkout();
 
                 // Notifier les changements de durée
                 this.notifyListeners();
