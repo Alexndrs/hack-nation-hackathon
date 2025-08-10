@@ -13,6 +13,6 @@ pip install -r requirements.txt
 
 ## Running the API
 ```bash
-uvicorn main:app --reload
+uvicorn main:app --host 0.0.0.0 --port 8000
 The server will run at: http://127.0.0.1:8000
 ```
