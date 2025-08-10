@@ -158,7 +158,7 @@ export default function TrainScreen() {
                     style={[
                         styles.trainingButtonText,
                         isActive ? styles.stopButtonText : styles.startButtonText,
-                    ]}
+                    ]} 
                 >
                     {isLoading
                         ? 'Chargement...'
