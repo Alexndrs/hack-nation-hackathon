@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, View, TouchableOpacity } from "react-native";
+import CallAgentBtn from './callAgentBtn';
 
 interface NavBarProps {
     activeScreen: string;
@@ -49,7 +50,8 @@ export default function NavBar({ activeScreen, setActiveScreen }: NavBarProps) {
                         }`}>
                         Plan
                     </Text>
-                </TouchableOpacity>
+                </TouchableOpacity >
+                <CallAgentBtn />
             </View>
         </View>
     )
