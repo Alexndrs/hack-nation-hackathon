@@ -10,6 +10,7 @@ export default function Workouts({ workouts }: {
 }) {
 
     const { getWorkoutTimeSeries } = useData();
+    
 
     const duration_h_min = (duration_seconds: number) => {
         const hours = Math.floor(duration_seconds / 3600);
@@ -44,7 +45,6 @@ export default function Workouts({ workouts }: {
                             onPress={() => getWorkoutTimeSeries(workout.id)}>
                             <EllipsisIcon size={20} color="rgba(255,255,255,0.40)" />
                         </TouchableOpacity>
-
                     </View>
                 );
             })}
