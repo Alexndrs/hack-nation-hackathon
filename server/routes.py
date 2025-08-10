@@ -15,6 +15,10 @@ def root():
 def get_workouts():
     return services.get_all_workouts()
 
+@router.get("/workouts-timeseries/{workout_id}")
+def get_workout_timeseries(workout_id: int):
+    return services.get_workout_timeseries(workout_id)
+
 @router.post("/workouts")
 def add_workout(workout: Workout):
     print(workout)

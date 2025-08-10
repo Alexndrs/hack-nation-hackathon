@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { type DailyLog } from '../api/types';
-import { getDailyLogs, postDailyLog, patchDailyLog } from '../api/data';
+import { type DailyLog, type Workout, type TimeSeriesPoint } from '../api/types';
+import { getDailyLogs, postDailyLog, patchDailyLog, getWorkouts, getWorkoutTimeSeries } from '../api/data';
 
 
 export const useData = () => {
     const [dailyLogs, setDailyLogs] = useState<Record<string, DailyLog>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [hasFetched, setHasFetched] = useState(false);
+    const [workouts, setWorkouts] = useState<Record<string, Workout[]>>({});
 
 
     const fetchDailyLogs = async () => {
@@ -28,6 +29,27 @@ export const useData = () => {
             setIsLoading(false);
         }
     }
+
+    const fetchWorkouts = async () => {
+        setIsLoading(true);
+        try {
+            const workouts = await getWorkouts();
+            const workoutsByDate: Record<string, Workout[]> = {};
+            workouts.forEach(workout => {
+                if (!workoutsByDate[workout.start_time]) {
+                    workoutsByDate[workout.start_time] = [];
+                }
+                workoutsByDate[workout.start_time].push(workout);
+            });
+            setWorkouts(workoutsByDate);
+            setHasFetched(true);
+        } catch (error) {
+            console.error("Failed to fetch workouts:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
 
     const addDailyLog = async (log: DailyLog): Promise<void> => {
         try {
@@ -58,6 +80,19 @@ export const useData = () => {
         }
     }
 
+    const getWorkoutsByDate = (date: string): Workout[] => {
+        return workouts[date] || [];
+    }
+
+    const getWorkoutTimeSeries = async (workoutId: number): Promise<TimeSeriesPoint[]> => {
+        try {
+            const timeSeries = await getWorkoutTimeSeries(workoutId);
+            return timeSeries;
+        } catch (error) {
+            console.error("Failed to fetch workout time series:", error);
+            throw error;
+        }
+    }
 
     return {
         dailyLogs,
@@ -65,6 +100,10 @@ export const useData = () => {
         addDailyLog,
         logByDate,
         updateDailyLog,
+        workouts,
+        fetchWorkouts,
+        getWorkoutsByDate,
+        getWorkoutTimeSeries,
         isLoading,
         hasFetched
     };

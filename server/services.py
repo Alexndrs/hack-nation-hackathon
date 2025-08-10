@@ -70,6 +70,19 @@ def get_all_workouts():
     conn.close()
     return [dict(row) for row in workouts]
 
+def get_workout_timeseries(workout_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM time_series_data WHERE workout_id = ?
+    """, (workout_id,))
+    timeseries = cursor.fetchall()
+    conn.close()
+    # Return a TimeSeriesPoint list
+    if not timeseries:
+        return []
+    return [TimeSeriesPoint(**row) for row in timeseries]
+
 
 def get_daily_logs():
     conn = get_connection()

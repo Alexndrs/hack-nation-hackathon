@@ -158,13 +158,13 @@ export default function TrainScreen() {
                     style={[
                         styles.trainingButtonText,
                         isActive ? styles.stopButtonText : styles.startButtonText,
-                    ]} 
+                    ]}
                 >
                     {isLoading
                         ? 'Chargement...'
                         : isActive
-                            ? 'Arrêter l\'entraînement'
-                            : 'Commencer l\'entraînement'}
+                            ? 'Stop the workout'
+                            : 'Start the workout'}
                 </Text>
             </TouchableOpacity>
         </View>
