@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { type DailyLog, type Workout, type TimeSeriesPoint } from '../api/types';
-import { getDailyLogs, postDailyLog, patchDailyLog, getWorkouts, getWorkoutTimeSeries } from '../api/data';
+import { getDailyLogs, postDailyLog, patchDailyLog, getWorkouts, getWorkoutTimeSeries as getWorkoutTimeSeriesAPI } from '../api/data';
 
 
 export const useData = () => {
     const [dailyLogs, setDailyLogs] = useState<Record<string, DailyLog>>({});
     const [isLoading, setIsLoading] = useState(false);
-    const [hasFetched, setHasFetched] = useState(false);
+    const [hasFetchedLogs, setHasFetchedLogs] = useState(false);
+    const [hasFetchedWorkouts, setHasFetchedWorkouts] = useState(false);
     const [workouts, setWorkouts] = useState<Record<string, Workout[]>>({});
 
 
     const fetchDailyLogs = async () => {
-        if (hasFetched) return;
+        if (hasFetchedLogs) return;
 
         setIsLoading(true);
         try {
@@ -21,7 +22,7 @@ export const useData = () => {
                 logsByDate[log.date] = log;
             });
             setDailyLogs(logsByDate);
-            setHasFetched(true);
+            setHasFetchedLogs(true);
 
         } catch (error) {
             console.error("Failed to fetch daily logs:", error);
@@ -31,18 +32,22 @@ export const useData = () => {
     }
 
     const fetchWorkouts = async () => {
+        if (hasFetchedWorkouts) return;
+
         setIsLoading(true);
         try {
             const workouts = await getWorkouts();
             const workoutsByDate: Record<string, Workout[]> = {};
             workouts.forEach(workout => {
-                if (!workoutsByDate[workout.start_time]) {
-                    workoutsByDate[workout.start_time] = [];
+                const date = new Date(workout.start_time);
+                const formattedDate = date.toISOString().split('T')[0];
+                if (!workoutsByDate[formattedDate]) {
+                    workoutsByDate[formattedDate] = [];
                 }
-                workoutsByDate[workout.start_time].push(workout);
+                workoutsByDate[formattedDate].push(workout);
             });
             setWorkouts(workoutsByDate);
-            setHasFetched(true);
+            setHasFetchedWorkouts(true);
         } catch (error) {
             console.error("Failed to fetch workouts:", error);
         } finally {
@@ -80,13 +85,22 @@ export const useData = () => {
         }
     }
 
-    const getWorkoutsByDate = (date: string): Workout[] => {
+    const workoutsByDate = (date: string): Workout[] => {
+        console.log("Fetching workouts for date:", date);
+        if (!workouts[date]) {
+            console.warn(`No workouts found for date: ${date}`);
+            return [];
+        }
+        console.log("Workouts found:", workouts[date]);
+
+
         return workouts[date] || [];
     }
 
     const getWorkoutTimeSeries = async (workoutId: number): Promise<TimeSeriesPoint[]> => {
         try {
-            const timeSeries = await getWorkoutTimeSeries(workoutId);
+            const timeSeries = await getWorkoutTimeSeriesAPI(workoutId);
+            console.log("Fetched time series for workout ID:", workoutId, timeSeries);
             return timeSeries;
         } catch (error) {
             console.error("Failed to fetch workout time series:", error);
@@ -102,9 +116,10 @@ export const useData = () => {
         updateDailyLog,
         workouts,
         fetchWorkouts,
-        getWorkoutsByDate,
+        workoutsByDate,
         getWorkoutTimeSeries,
         isLoading,
-        hasFetched
+        hasFetchedLogs,
+        hasFetchedWorkouts
     };
 }
