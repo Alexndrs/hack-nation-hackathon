@@ -17,11 +17,15 @@ export default function PlanScreen() {
         updateDailyLog,
         logByDate,
         isLoading,
-        hasFetched
+        fetchWorkouts,
+        workoutsByDate,
+        hasFetchedLogs,
+        hasFetchedWorkouts,
     } = useData();
 
     useEffect(() => {
         fetchDailyLogs();
+        fetchWorkouts();
     }, []);
 
 
@@ -49,8 +53,10 @@ export default function PlanScreen() {
     const dateString = date.toISOString().split('T')[0];
     const existingLog = logByDate(dateString);
 
+    const workouts = workoutsByDate(dateString);
 
-    if (isLoading && !hasFetched) {
+
+    if (isLoading && (!hasFetchedLogs || !hasFetchedWorkouts)) {
         return (
             <View className="flex-1 items-center justify-center">
                 <View className="items-center">
@@ -75,7 +81,7 @@ export default function PlanScreen() {
                 existingLog={existingLog}
                 onSave={handleSave}
             />
-            <Workouts />
+            <Workouts workouts={workouts} />
         </View>
     );
 }
