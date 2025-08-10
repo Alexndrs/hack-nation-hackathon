@@ -86,14 +86,14 @@ class TrainingService {
             }
 
             // GPS background
-            // const bgStatus = await Location.getBackgroundPermissionsAsync();
-            // if (bgStatus.status !== 'granted') {
-            //     const bgRequest = await Location.requestBackgroundPermissionsAsync();
-            //     if (bgRequest.status !== 'granted') {
-            //         this.setError('Permission GPS arrière-plan refusée');
-            //         return false;
-            //     }
-            // }
+            const bgStatus = await Location.getBackgroundPermissionsAsync();
+            if (bgStatus.status !== 'granted') {
+                const bgRequest = await Location.requestBackgroundPermissionsAsync();
+                if (bgRequest.status !== 'granted') {
+                    this.setError('Permission GPS arrière-plan refusée');
+                    return false;
+                }
+            }
 
             this.clearError();
             return true;
