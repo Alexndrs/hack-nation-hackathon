@@ -105,6 +105,7 @@ class TrainingService {
     }
 
     async startTraining(): Promise<boolean> {
+
         try {
             this.clearError();
 
@@ -132,6 +133,8 @@ class TrainingService {
 
             // Notifier que le training a vraiment commencé
             this.notifyListeners();
+
+            
             return true;
         } catch (error) {
             console.error('Error starting training:', error);

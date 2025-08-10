@@ -1,5 +1,3 @@
-
-
 import { SERVER_URL } from "./config";
 import { DailyLog, TimeSeriesPoint, Workout } from "./types";
 

@@ -87,6 +87,12 @@ export default function CallAgentScreen() {
         await conversation.sendUserMessage('Hello, how can you help me?');
     };
 
+    const sendContextualUpdate = async () => {
+      await conversation.sendContextualUpdate(
+        'User navigated to the profile page. Consider this for next response.'
+      );
+    };
+
     const toggleConversation = () => {
       if (!isConnected) {
         startConversation();
