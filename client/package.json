@@ -9,10 +9,12 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@elevenlabs/client": "^0.5.0",
     "@react-navigation/bottom-tabs": "^7.4.5",
     "@react-navigation/native": "^7.1.17",
     "expo": "~53.0.20",
     "expo-av": "~15.1.7",
+    "expo-location": "~18.1.6",
     "expo-status-bar": "~2.2.3",
     "lucide-react-native": "^0.539.0",
     "nativewind": "^4.1.23",
@@ -22,8 +24,7 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "tailwindcss": "^3.4.17",
-    "expo-location": "~18.1.6"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

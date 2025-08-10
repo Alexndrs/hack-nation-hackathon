@@ -15,7 +15,7 @@ class TimeSeriesPoint(BaseModel):
     longitude: float
 
 class DailyLog(BaseModel):
-    workout_id: int
+    date: str
     sleep_seconds: int
     calories: float
     weight_kg: float

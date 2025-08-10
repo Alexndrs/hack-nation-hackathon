@@ -2,6 +2,7 @@ import random
 import time
 from database import get_connection
 from models import Workout, TimeSeriesPoint, DailyLog
+from typing import List
 
 # Insert operations
 def insert_workout(workout: Workout) -> int:
@@ -16,13 +17,15 @@ def insert_workout(workout: Workout) -> int:
     conn.close()
     return workout_id
 
-def insert_time_series(point: TimeSeriesPoint):
+def insert_time_series(point: List[TimeSeriesPoint]):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO time_series_data (workout_id, timestamp, speed, heart_rate, latitude, longitude)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (point.workout_id, point.timestamp, point.speed, point.heart_rate, point.latitude, point.longitude))
+    for p in point:
+        cursor.execute("""
+            INSERT INTO time_series_data (workout_id, timestamp, speed, heart_rate, latitude, longitude)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (p.workout_id, p.timestamp, p.speed, p.heart_rate, p.latitude, p.longitude))
+
     conn.commit()
     conn.close()
 
@@ -30,9 +33,9 @@ def insert_daily_log(log: DailyLog):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO daily_log (workout_id, sleep_seconds, calories, weight_kg)
+        INSERT INTO daily_log (date, sleep_seconds, calories, weight_kg)
         VALUES (?, ?, ?, ?)
-    """, (log.workout_id, log.sleep_seconds, log.calories, log.weight_kg))
+    """, (log.date, log.sleep_seconds, log.calories, log.weight_kg))
     conn.commit()
     conn.close()
 
@@ -44,6 +47,15 @@ def get_all_workouts():
     workouts = cursor.fetchall()
     conn.close()
     return [dict(row) for row in workouts]
+
+
+def get_daily_logs():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM daily_log")
+    logs = cursor.fetchall()
+    conn.close()
+    return [dict(row) for row in logs]
 
 # Fake data generator
 def generate_fake_workout():
@@ -78,13 +90,14 @@ def generate_fake_workout():
         """, (workout_id, ts, speed, hr, lat, lon))
 
     # Daily log
+    date = time.strftime('%Y-%m-%d', time.localtime(start_time))
     sleep_sec = random.randint(18000, 32400)
     calories = round(random.uniform(1800, 3500), 1)
     weight = round(random.uniform(55, 90), 1)
     cursor.execute("""
-        INSERT INTO daily_log (workout_id, sleep_seconds, calories, weight_kg)
-        VALUES (?, ?, ?, ?)
-    """, (workout_id, sleep_sec, calories, weight))
+        INSERT INTO daily_log (workout_id, date, sleep_seconds, calories, weight_kg)
+        VALUES (?, ?, ?, ?, ?)
+    """, (workout_id,date, sleep_sec, calories, weight))
 
     conn.commit()
     conn.close()

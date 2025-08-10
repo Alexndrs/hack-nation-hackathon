@@ -3,10 +3,11 @@ from models import Workout, TimeSeriesPoint, DailyLog
 import services
 import shutil
 import os
+from typing import List
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/handshake")
 def root():
     return {"message": "Running Coach API is running!"}
 
@@ -19,8 +20,12 @@ def add_workout(workout: Workout):
     workout_id = services.insert_workout(workout)
     return {"status": "Workout added", "workout_id": workout_id}
 
+@router.get("/daily-logs")
+def get_daily_logs():
+    return services.get_daily_logs()
+
 @router.post("/time-series")
-def add_time_series(point: TimeSeriesPoint):
+def add_time_series(point: List[TimeSeriesPoint]):
     services.insert_time_series(point)
     return {"status": "Time series point added"}
 

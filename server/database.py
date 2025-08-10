@@ -40,11 +40,10 @@ def init_db():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS daily_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            workout_id INTEGER,
+            date TEXT,
             sleep_seconds INTEGER,
             calories REAL,
             weight_kg REAL,
-            FOREIGN KEY (workout_id) REFERENCES workout (id)
         )
     """)
 
