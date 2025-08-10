@@ -1,11 +1,13 @@
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import * as d3 from "d3";
 import { useData } from "../hooks/useData"; // adjust path
 import Svg, { Path, Line, Circle, G } from "react-native-svg";
+import { useDataContext } from "../context/dataProvider";
 
 function LineChart() {
-    const { dailyLogs } = useData(); // fetches data via your getDailyLogs
+    const { dailyLogs, timelineData } = useDataContext(); // fetches data via your getDailyLogs
+
     const [chartData, setChartData] = useState<any[]>([]);
 
     useEffect(() => {
@@ -43,20 +45,20 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
     const marginRight = 70;
     const marginBottom = 30;
     const marginLeft = 40;
-    
-    d3.select("#line-container").select("svg").remove(); 
+
+    d3.select("#line-container").select("svg").remove();
     const x = d3.scaleBand()
-        .domain(data.map(d => d.date.toISOString())) 
+        .domain(data.map(d => d.date.toISOString()))
         .range([marginLeft, width - marginRight]);
-    
+
     const y = d3.scaleLinear<number, number>()
         .domain([0, d3.max(data, (d: DataPoint) => d.close) as number])
         .range([height - marginBottom, marginTop]);
-  
+
     const line = d3.line<DataPoint>()
         .x(d => x(d.date.toISOString()) as number)
         .y(d => y(d.close));
-  
+
     const svg = d3.select("#line-container")
         .append("svg")
         .attr("width", width)
@@ -66,28 +68,28 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
 
     const defs = svg.append("defs");
     const gradient_1 = defs
-    .append("linearGradient")
-    .attr("id", "gradient_1")
-    .attr("x1", "0%")
-    .attr("y1", "100%")
-    .attr("x2", "50%")
-    .attr("y2", "0%");
-    
-  gradient_1.append("stop")
-    .attr("offset", "0%")
-    .attr("stop-color", "#ffafcc"); 
-  gradient_1.append("stop")
-    .attr("offset", "100%")
-    .attr("stop-color", "#ffd7e6"); 
-    
+        .append("linearGradient")
+        .attr("id", "gradient_1")
+        .attr("x1", "0%")
+        .attr("y1", "100%")
+        .attr("x2", "50%")
+        .attr("y2", "0%");
+
+    gradient_1.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#ffafcc");
+    gradient_1.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#ffd7e6");
+
     // Add the x-axis.
     const xAxis = svg.append("g")
         .attr("transform", `translate(0,${height - marginBottom})`)
         .call(d3.axisBottom(x).ticks(width / 80).tickSizeOuter(0));
 
     xAxis.select("path.domain")
-        .attr("stroke-dasharray", 13*80)
-        .attr("stroke-dashoffset", 13*80) 
+        .attr("stroke-dasharray", 13 * 80)
+        .attr("stroke-dashoffset", 13 * 80)
         .transition()
         .duration(800)
         .delay(1000)
@@ -101,9 +103,9 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
     }
 
     xAxis
-        .call((g) => 
+        .call((g) =>
             g.append("text")
-                .attr("x", width-marginRight + 5)
+                .attr("x", width - marginRight + 5)
                 .attr("y", 5)
                 .attr("fill", "currentColor")
                 .attr("text-anchor", "start")
@@ -112,22 +114,22 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
         .attr("font-size", 2)
         .attr("opacity", 0)
         .transition()
-        .delay(1500) 
+        .delay(1500)
         .duration(800)
         .ease(d3.easeElastic)
         .delay((d: unknown, i: number) => Math.random() * 1000)
         .attr("font-size", 12)
         .attr('opacity', 1)
         .attr("font-weight", "bold");
-    
+
 
 
     const yAxis = svg.append("g")
         .attr("transform", `translate(${marginLeft},0)`)
         .call(d3.axisLeft(y).ticks(height / 40));
-      
 
-      yAxis.select("path.domain")
+
+    yAxis.select("path.domain")
         .attr("stroke-dasharray", height * 40)
         .attr("stroke-dashoffset", height * 40)
         .transition()
@@ -135,9 +137,9 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
         .delay(1500)
         .ease(d3.easeCubic)
         .attr("stroke-dashoffset", 0);
-      
 
-    
+
+
     interface TickDatum {
         value: number;
         index: number;
@@ -154,11 +156,11 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
         .delay((d: TickDatum, i: number) => Math.random() * 1000)
         .ease(d3.easeCubic)
         .attr("stroke-dashoffset", 0);
-        
-    
-    
+
+
+
     yAxis
-        .call((g) => 
+        .call((g) =>
             g.append("text")
                 .attr("x", -marginLeft)
                 .attr("y", 10)
@@ -169,22 +171,22 @@ function GraphVisualization({ data }: { data: DataPoint[] }) {
         .attr("font-size", 2)
         .attr("opacity", 0)
         .transition()
-        .delay(1500) 
+        .delay(1500)
         .duration(800)
         .ease(d3.easeElastic)
         .delay((d: any, i: number) => Math.random() * 1000)
         .attr("font-size", 12)
         .attr('opacity', 1)
-        .attr("font-weight", "bold"); 
+        .attr("font-weight", "bold");
 
 
 
     const path = svg.append("path")
-    .attr("fill", "none")
-    .attr("stroke", "url(#gradient_1)")
-    .attr("stroke-width", 3.5)
-    .attr("d", line(data));
-    
+        .attr("fill", "none")
+        .attr("stroke", "url(#gradient_1)")
+        .attr("stroke-width", 3.5)
+        .attr("d", line(data));
+
     const totalLength = 1700;
     path
         .attr("stroke-dasharray", totalLength)

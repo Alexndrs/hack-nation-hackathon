@@ -4,8 +4,9 @@ import { View, ActivityIndicator, Text } from "react-native";
 import DateNav from "../components/dateNav";
 import DailyLogForm from "../components/dailyLogForm";
 import Workouts from "../components/workouts";
-import { useData } from "../hooks/useData";
+import TimeSeriesContainer from "../components/timeSeriesContainer";
 import { DailyLog } from "../api/types";
+import { useDataContext } from "../context/dataProvider";
 
 
 export default function PlanScreen() {
@@ -21,7 +22,8 @@ export default function PlanScreen() {
         workoutsByDate,
         hasFetchedLogs,
         hasFetchedWorkouts,
-    } = useData();
+    } = useDataContext();
+
 
     useEffect(() => {
         fetchDailyLogs();
@@ -70,7 +72,7 @@ export default function PlanScreen() {
 
 
     return (
-        <View className="flex-1 items-center ">
+        <View className="flex-1 items-center h-screen overflow-hidden">
             <DateNav
                 handlePreviousDay={handlePreviousDay}
                 handleNextDay={handleNextDay}
@@ -82,6 +84,7 @@ export default function PlanScreen() {
                 onSave={handleSave}
             />
             <Workouts workouts={workouts} />
+            <TimeSeriesContainer />
         </View>
     );
 }

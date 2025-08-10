@@ -9,6 +9,9 @@ export const useData = () => {
     const [hasFetchedLogs, setHasFetchedLogs] = useState(false);
     const [hasFetchedWorkouts, setHasFetchedWorkouts] = useState(false);
     const [workouts, setWorkouts] = useState<Record<string, Workout[]>>({});
+    const [timelineData, setTimelineData] = useState<TimeSeriesPoint[]>([]);
+
+    const [showTimeSeries, setShowTimeSeries] = useState(false);
 
 
     const fetchDailyLogs = async () => {
@@ -55,7 +58,6 @@ export const useData = () => {
         }
     }
 
-
     const addDailyLog = async (log: DailyLog): Promise<void> => {
         try {
             await postDailyLog(log);
@@ -97,11 +99,10 @@ export const useData = () => {
         return workouts[date] || [];
     }
 
-    const getWorkoutTimeSeries = async (workoutId: number): Promise<TimeSeriesPoint[]> => {
+    const setWorkoutTimeSeries = async (workoutId: number): Promise<void> => {
         try {
             const timeSeries = await getWorkoutTimeSeriesAPI(workoutId);
-            console.log("Fetched time series for workout ID:", workoutId, timeSeries);
-            return timeSeries;
+            setTimelineData(timeSeries);
         } catch (error) {
             console.error("Failed to fetch workout time series:", error);
             throw error;
@@ -117,9 +118,12 @@ export const useData = () => {
         workouts,
         fetchWorkouts,
         workoutsByDate,
-        getWorkoutTimeSeries,
+        setWorkoutTimeSeries,
+        timelineData,
         isLoading,
         hasFetchedLogs,
-        hasFetchedWorkouts
+        hasFetchedWorkouts,
+        showTimeSeries,
+        setShowTimeSeries,
     };
 }
