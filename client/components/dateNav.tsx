@@ -22,7 +22,7 @@ export default function DateNav({ handlePreviousDay, handleNextDay, date }: {
                 <Triangle size={25} color="rgba(255,255,255,0.2)" />
             </TouchableOpacity>
 
-            <Text className="text-gray-300 text-lg px-8 py-4 rounded-full bg-white/10 border border-white/10">
+            <Text className="text-gray-300 font-bold text-lg px-8 py-4 rounded-full bg-white/10 border border-white/10">
                 {formatDate(date)}
             </Text>
 
